@@ -22,7 +22,7 @@ const contacts = {
   email: "sagar.singh152810@gmail.com",
   github: "https://github.com/SagarSingh1510",
   linkedin: "https://www.linkedin.com/in/sagar-singh-developer15/",
-  resume: "https://drive.google.com/file/d/1Nkr4NDFr2A72c5q5tCLJOjE1fwXZKZpY/view?usp=sharing",
+  resume: "https://drive.google.com/file/d/1Txx4EiMaFcEej2BIW2ldWWr-Ui1uAeE3/view?usp=sharing",
 };
 
 const metrics = [
