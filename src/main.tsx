@@ -22,7 +22,7 @@ const contacts = {
   email: "sagar.singh152810@gmail.com",
   github: "https://github.com/SagarSingh1510",
   linkedin: "https://www.linkedin.com/in/sagar-singh-developer15/",
-  resume: "/Sagar-Singh-Resume.pdf",
+  resume: "https://drive.google.com/file/d/1Nkr4NDFr2A72c5q5tCLJOjE1fwXZKZpY/view?usp=sharing",
 };
 
 const metrics = [
@@ -76,6 +76,21 @@ const skillGroups = [
   { title: "Systems", items: ["Microservices", "Kafka", "JWT", "OAuth 2.0", "DDD"] },
   { title: "Delivery", items: ["Docker", "Kubernetes", "GitHub Actions", "Maven", "Swagger"] },
   { title: "Quality", items: ["JUnit 5", "Mockito", "Integration Tests", "SOLID", "Design Patterns"] },
+];
+
+const certifications = [
+  {
+    name: "AWS Certified Cloud Practitioner",
+    issuer: "AWS",
+    href: "https://www.linkedin.com/in/sagar-singh-developer15/overlay/Certifications/1428808971/treasury/?profileId=ACoAAEyqoR0B1qEPkgcbkxhLdzJDrKHgZw2Ytbg",
+    icon: Award,
+  },
+  {
+    name: "Software Engineering Job Simulation",
+    issuer: "JPMorgan Chase & Co.",
+    href: "https://www.theforage.com/completion-certificates/Sj7temL583QAYpHXD/E6McHJDKsQYh79moz_Sj7temL583QAYpHXD_6a5f17b8a285deac747eadbf_1784703920336_completion_certificate.pdf",
+    icon: Braces,
+  },
 ];
 
 function useScrollScalar() {
@@ -186,6 +201,37 @@ function BackendUniverse({ scroll }: { scroll: number }) {
   );
 }
 
+function GlowCursor() {
+  const reduced = useReducedMotion();
+  const [position, setPosition] = useState({ x: -120, y: -120 });
+  const [pressed, setPressed] = useState(false);
+
+  useEffect(() => {
+    if (reduced || matchMedia("(pointer: coarse)").matches) return;
+    const move = (event: PointerEvent) => setPosition({ x: event.clientX, y: event.clientY });
+    const down = () => setPressed(true);
+    const up = () => setPressed(false);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerdown", down);
+    window.addEventListener("pointerup", up);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointerup", up);
+    };
+  }, [reduced]);
+
+  if (reduced) return null;
+
+  return (
+    <motion.div
+      className={pressed ? "glow-cursor pressed" : "glow-cursor"}
+      animate={{ x: position.x, y: position.y, scale: pressed ? 0.72 : 1 }}
+      transition={{ type: "spring", stiffness: 520, damping: 36, mass: 0.45 }}
+    />
+  );
+}
+
 function Scene() {
   const scroll = useScrollScalar();
 
@@ -254,6 +300,7 @@ function App() {
 
   return (
     <main>
+      <GlowCursor />
       <Scene />
       <motion.div className="scroll-progress" style={{ scaleX: progressScale }} />
       <nav className="nav" aria-label="Primary navigation">
@@ -280,7 +327,7 @@ function App() {
               <a href="#projects" className="button primary">
                 View systems <ArrowUpRight size={18} />
               </a>
-              <a href={contacts.resume} download className="button secondary">
+              <a href={contacts.resume} target="_blank" rel="noreferrer" className="button secondary">
                 Download resume <ArrowUpRight size={17} />
               </a>
             </div>
@@ -299,11 +346,19 @@ function App() {
           </Reveal>
         </div>
         <div className="metric-strip" aria-label="Career highlights">
-          {metrics.map((metric) => (
-            <div key={metric.label}>
+          {metrics.map((metric, index) => (
+            <motion.div
+              className="metric-card"
+              key={metric.label}
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.08, duration: 0.55 }}
+              whileHover={{ y: -8 }}
+            >
               <strong>{metric.value}</strong>
               <span>{metric.label}</span>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -402,8 +457,16 @@ function App() {
           <p>Bachelor of Technology in Computer Science, CGPA 8.3/10, 2021 - 2025.</p>
         </Reveal>
         <Reveal className="certs">
-          <div><Award size={20} /><span>AWS Certified Cloud Practitioner</span></div>
-          <div><Braces size={20} /><span>JPMorgan Chase & Co. Software Engineering Job Simulation</span></div>
+          {certifications.map((cert) => {
+            const Icon = cert.icon;
+            return (
+              <a href={cert.href} target="_blank" rel="noreferrer" key={cert.name}>
+                <Icon size={20} />
+                <span><strong>{cert.name}</strong>{cert.issuer}</span>
+                <ArrowUpRight size={16} />
+              </a>
+            );
+          })}
         </Reveal>
       </section>
 
