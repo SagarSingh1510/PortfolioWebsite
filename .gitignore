@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vite/
+.pnpm-store/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+*.log
+desktop-preview.png
+mobile-preview.png
