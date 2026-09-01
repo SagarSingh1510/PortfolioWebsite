@@ -14,7 +14,6 @@ import {
   Mail,
   Network,
   ShieldCheck,
-  Terminal,
 } from "lucide-react";
 import * as THREE from "three";
 import "./styles.css";
@@ -216,16 +215,55 @@ function Reveal({ children, className = "" }: { children: React.ReactNode; class
 }
 
 function App() {
+  const { scrollYProgress } = useScroll();
+  const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const sections = ["experience", "projects", "skills", "contact"];
+  const [activeSection, setActiveSection] = useState("top");
+
+  useEffect(() => {
+    const observed = ["top", ...sections]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible?.target.id) setActiveSection(visible.target.id);
+      },
+      { rootMargin: "-32% 0px -52% 0px", threshold: [0.2, 0.45, 0.7] }
+    );
+
+    observed.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+
+  const handleTilt = (event: React.MouseEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 10;
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * -10;
+    event.currentTarget.style.setProperty("--tilt-x", y.toFixed(2) + "deg");
+    event.currentTarget.style.setProperty("--tilt-y", x.toFixed(2) + "deg");
+  };
+
+  const resetTilt = (event: React.MouseEvent<HTMLElement>) => {
+    event.currentTarget.style.setProperty("--tilt-x", "0deg");
+    event.currentTarget.style.setProperty("--tilt-y", "0deg");
+  };
+
   return (
     <main>
       <Scene />
+      <motion.div className="scroll-progress" style={{ scaleX: progressScale }} />
       <nav className="nav" aria-label="Primary navigation">
-        <a href="#top" className="brand">Sagar Singh</a>
+        <a href="#top" className={activeSection === "top" ? "brand active" : "brand"}>Sagar Singh</a>
         <div className="nav-links">
-          <a href="#experience">Experience</a>
-          <a href="#projects">Projects</a>
-          <a href="#skills">Systems</a>
-          <a href="#contact">Contact</a>
+          {sections.map((section) => (
+            <a key={section} href={`#${section}`} className={activeSection === section ? "active" : undefined}>
+              {section === "skills" ? "Systems" : section}
+            </a>
+          ))}
         </div>
       </nav>
 
@@ -247,7 +285,7 @@ function App() {
               </a>
             </div>
           </Reveal>
-          <Reveal className="system-panel">
+          <Reveal className="system-panel interactive-panel">
             <div className="panel-top">
               <span>Live profile signal</span>
               <span>Bengaluru, India</span>
@@ -301,7 +339,16 @@ function App() {
         </Reveal>
         <div className="project-stack">
           {projects.map((project, index) => (
-            <Reveal className="project-case" key={project.name}>
+            <motion.article
+              className="project-case tilt-surface"
+              key={project.name}
+              onMouseMove={handleTilt}
+              onMouseLeave={resetTilt}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.18 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            >
               <div className="case-index">0{index + 1}</div>
               <div className="case-content">
                 <p className="eyebrow">{project.eyebrow}</p>
@@ -316,6 +363,7 @@ function App() {
                 </a>
               </div>
               <div className="architecture-card" aria-hidden="true">
+                <div className="scan-beam" />
                 <div className="arch-node large"><Cpu size={22} /></div>
                 <div className="arch-node left"><ShieldCheck size={19} /></div>
                 <div className="arch-node right"><Database size={19} /></div>
@@ -324,7 +372,7 @@ function App() {
                 <span className="arch-line two" />
                 <span className="arch-line three" />
               </div>
-            </Reveal>
+            </motion.article>
           ))}
         </div>
       </section>
@@ -359,7 +407,7 @@ function App() {
         </Reveal>
       </section>
 
-      <section id="contact" className="section contact">
+      <section id="contact" className="section contact readability-panel">
         <Reveal>
           <p className="eyebrow">Contact</p>
           <h2>Recruiting for backend ownership, full-stack execution, and systems-minded product work.</h2>
